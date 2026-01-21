@@ -1,3 +1,4 @@
+#include "../include/utils.h"
 #include <errno.h>
 #include <netinet/in.h>
 #include <signal.h>
@@ -73,15 +74,28 @@ int main(int argc, char **argv) {
   pid_t childPid;
   int connection_fd;
   socklen_t client_len;
-
-  signal(SIGCHLD, SIG_DFL); // handle signals
+  Signal(SIGCHLD, SIGCHLD_handler);
+  // signal(SIGCHLD, SIG_DFL); // handle signals (inbuilt handler)
 
   // keep the server running
   while (1) {
     // accept clients connection
-    client_len = sizeof(client_addr);
     // the client calls connect and the server calls accept - causes TCP handshake - afterwards both functions return to server and client respectively
+    // for (;;) {
+    // } infinite loop
+    client_len = sizeof(client_addr);
     connection_fd = accept(listen_fd, (struct sockaddr *)&client_addr, &client_len);
+    if (connection_fd < 0) {
+      if (errno == EINTR ||
+          errno ==
+              ECONNABORTED) { // EINTR means intrupted by a signal, ECONNABORTED happens when 3 way handsake is done and the connection is put into the servers completed connection queue but befoure the server calls accept() the client sends RST(reset) aborting the connection hence the accept returns -1 i.e. connection_fd < 0 and the errno is set to ECONNABORTED
+        continue;
+      } else {
+        perror("accept error");
+        continue;
+      }
+    }
+
     printf("Client Connected\n");
     // over here when the fork returns 0 to the child and the pid to the parent so the child evaluates the if condition to true and enters inside the if scope but the parent recieves the childs pid and hence evaluates the condition to false and skips the block entirely
 
@@ -99,3 +113,5 @@ int main(int argc, char **argv) {
 
 // --- FOOTNOTES ---
 // if the parent process is terminated and that process has children in zombie state (zombie state's purpose is to maintain info about the child for the parent to fetch at some time later like process id, termination status, info on resource utilization etc...), these zombies take up kernel space and we will eventually run out of processess so that's why we must clean them up, when the parent process terminates while it has children in zombie state the init process inherits them assigns everyone id 1 and waits for them
+
+// slow sys call - call that can block forever. ex: accept(), read()

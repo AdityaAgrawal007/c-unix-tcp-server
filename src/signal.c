@@ -1,6 +1,8 @@
+#include "../include/utils.h"
 #include <signal.h>
 
 typedef void Sigfunc(int);
+
 Sigfunc *Signal(int signal_no, Sigfunc *function_ptr) {
   struct sigaction new_signal_to_install, old_signal;
   new_signal_to_install.sa_handler = function_ptr;
