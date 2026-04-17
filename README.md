@@ -61,18 +61,3 @@ Type two integers:
 3 7
 Server replied: 10
 ```
- 
-## Structure
- 
-```
-.
-├── include/
-│   └── utils.h
-└── src/
-    ├── tcp_server.c
-    ├── client.c
-    ├── str_cli.c
-    ├── str_add.c
-    ├── signal.c
-    └── SIGCHLD_handler.c
-```
